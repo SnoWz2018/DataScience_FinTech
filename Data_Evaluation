@@ -1,0 +1,58 @@
+import pandas as pd
+
+df = pd.read_csv('cancer_data.csv')
+df.head()
+
+# 数据框的维度
+df.shape  
+df.shape[0] #行数
+df.shape[1] #列数
+
+# 数据类型
+df.dtypes
+type(df['column_name'][0])
+
+# 显示 dataframe 的简明摘要，
+# 包括每列非空值的数量
+df.info()
+
+# 返回每列数据的有效描述性统计
+df.describe()
+
+# 返回 dataframe 中的前几行
+# 默认返回前五行
+df.head()
+df.head(20)
+
+# 后几行
+df.tail()
+df.tail(20)
+
+# 数据定位/筛选 loc & iloc
+# https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html
+
+# 选择从 'id' 到最后一个均值列的所有列
+df_means = df.loc[:,'id':'fractal_dimension_mean']
+df_means.head()
+
+# 用索引号重复以上步骤
+df_means = df.iloc[:,:12]
+df_means.head()
+
+df_means.to_csv('cancer_data_edited.csv', index=False)
+
+# 选择间隔的多列
+
+# 创建标准误差 dataframe
+import numpy as np
+df_std = df.iloc[:,np.r_[0,12:22]]
+
+# 查看前几行，确认是否成功
+df_std.head()
+
+# 创建最大值数据框
+import numpy as np
+df_max = df.iloc[:,np.r_[0,22:32]]
+
+# 查看前几行，确认是否成功
+df_max.head
