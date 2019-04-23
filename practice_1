@@ -1,0 +1,38 @@
+# 导入并加载数据
+import pandas as pd
+df = pd.read_csv('store_data.csv')
+
+
+# 最后一个月的总销售额
+df.tail(30)
+df.loc[196:199].sum()
+
+# 平均销售额
+df.mean()
+
+# 2016 年 3 月 13 日的销售额
+df[df['week']=='2016-03-13']
+
+# C 店销售额最低的一周
+df.sort_values("storeC")
+
+# 最近 3 个月的总销售额
+df[df['week']>'2017-11-30']
+
+# visualization-------------------------------------------------------------
+
+import pandas as pd
+% matplotlib inline
+df = pd.read_csv('store_data.csv')
+
+# 上个月的销售额
+df_a = df[df['week']>'2018-01-30'].sum()[1:]
+df_a.plot(kind='bar')
+
+# 平均销售额
+df_b = df[1:].mean()
+df_b.plot(kind='bar')
+
+# 2016 年 3 月 13 日所在的那一周的销售额
+df_c = df[df['week']=='2016-03-13']
+df_c.plot(kind='bar')
