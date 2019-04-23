@@ -1,0 +1,320 @@
+# 数据来源：https://www.fueleconomy.gov/feg/download.shtml/
+
+import pandas as pd
+df_08 = pd.read_csv('all_alpha_08.csv')
+df_18 = pd.read_csv('all_alpha_18.csv')
+
+df_08.head(1)
+df_18.head(1)
+
+# 直接删除无关/不一致的列，用pandas.drop
+# 从 2008 数据集中丢弃列
+df_08.drop(['Stnd', 'Underhood ID', 'FE Calc Appr', 'Unadj Cmb MPG'], axis=1, inplace=True)
+# 确认更改
+df_08.head(1)
+
+# 从 2018 数据集中丢弃列
+df_18.drop(['Stnd'、'Stnd Description'、'Underhood ID'、'Comb CO2'], axis=1, inplace=True)
+# 确认更改
+df_18.head(1)
+
+# 将销售区域重命名为特定区域
+df_08.rename(columns={"Sales Area":"Cert Region"},inplace=True)
+# 确认更改
+df_08.head(1)
+
+# 在 2008 数据集中用下划线和小写标签代替空格
+df_08.rename(columns=lambda x: x.strip().lower().replace(" ", "_"), inplace=True)
+# 确认更改
+df_08.head(1)
+
+# 在 2018 数据集中用下划线和小写标签代替空格
+df_18.rename(columns=lambda x:x.strip().lower().replace(" ","_"), inplace=True)
+# 确认更改
+df_18.head(1)
+
+# 确认 2008 和 2018 数据集的列标签相同
+df_08.columns == df_18.columns
+
+# 保存新数据集，供下一段使用
+df_08.to_csv('data_08.csv', index=False)
+df_18.to_csv('data_18.csv', index=False)
+
+# 过滤、丢空、去重--------------------------------------------------------------------------
+
+# 加载数据集
+import pandas as pd
+df_08 = pd.read_csv('data_08.csv')
+df_18 = pd.read_csv('data_18.csv')
+
+# 过滤满足加州标准的行的数据集
+df_08 = df_08.query("cert_region=='CA'")
+df_18 = df_18.query("cert_region=='CA'")
+
+# 确定唯一的认证区域是加州
+df_08['cert_region'].unique()
+df_18['cert_region'].unique()
+
+# 将认证区域列从两个数据集中丢弃
+df_08.drop(['cert_region'],axis=1,inplace=True)
+df_18.drop(['cert_region'],axis=1,inplace=True)
+
+# 保存新数据集，供下一段使用
+df_08.to_csv('data_08.csv', index=False)
+df_18.to_csv('data_18.csv', index=False)
+
+# 修正数据类型（1）
+
+# 加载数据集
+import pandas as pd
+df_08 = pd.read_csv('data_08.csv')
+df_18 = pd.read_csv('data_18.csv')
+
+# 检查 2008 cyl 列的值数量
+df_08['cyl'].value_counts()
+
+# 从 2008 cyl 列的字符串中提取整数
+# https://stackoverflow.com/questions/35376387/extract-int-from-string-in-pandas
+df_08['cyl'] = df_08['cyl'].str.extract('(\d+)').astype(int)
+
+# 再次检查 2008 cyl 列的值数量，确认更改
+df_08['cyl'].value_counts()
+
+# 将 2018 cyl 列转换成整数
+df_18['cyl'] = df_18['cyl'].astype(int)
+
+#保存
+df_08.to_csv('data_08.csv', index=False)
+df_18.to_csv('data_18.csv', index=False)
+
+# 修正数据类型（2）
+# 尝试使用 Pandas 的 to_numeric 或 astype 功能将2008 air_pollution_score 列转换成浮点——无法转换
+df_08['air_pollution_score'].value_counts()
+df_08.loc[582] # 第583行的‘air_pollution_score’=6/4
+
+# 存在这个问题的不只是空气污染分数！
+# mpg 列和温室气体分数也存在同样的问题。这可能是它们都被保存为字符串的原因。根据我在 PDF 文档中找到的 这个链接，
+# https://www.fueleconomy.gov/feg/findacarhelp.shtml#airPollutionScore
+# “如果车辆采用多种燃料提供动力，应该提供每个燃料类型的估值。”
+# 所以，采用混合动力的所有车辆，例如上面这辆车（采用乙醇和天然气），它们的字符串具有两个值，每种燃料为一个值。
+# 这有点复杂，我将给你展示如何用 2008 数据集实现这个效果，之后你用 2018 数据集尝试一下。
+
+# 首先，获取 2008 年的所有混合动力
+hb_08 = df_08[df_08['fuel'].str.contains('/')]
+hb_08
+
+# 2018年的混合动力
+hb_18 = df_18[df_18['fuel'].str.contains('/')]
+hb_18
+
+# pandas.apply
+# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.apply.html
+
+# 将被 "/" 分割的列
+split_columns = ['fuel', 'air_pollution_score', 'city_mpg', 'hwy_mpg', 'cmb_mpg', 'greenhouse_gas_score']
+
+# 对每个数据框副本的每个列应用分割功能
+for c in split_columns:
+    df1[c] = df1[c].apply(lambda x: x.split("/")[0])
+    df2[c] = df2[c].apply(lambda x: x.split("/")[1])
+    
+# 将数据框组合，添加到原始数据框中
+new_rows = df1.append(df2)
+# 现在每辆车的每种燃料类型都有单独的行
+new_rows
+
+# 丢弃原始混合动力行
+df_08.drop(hb_08.index, inplace=True)
+
+# 添加新分割的行
+df_08 = df_08.append(new_rows, ignore_index=True)
+
+# 检查含有 "/" 的所有原始混合动力行是否都已删除
+df_08[df_08['fuel'].str.contains('/')]
+
+# 创建 2018 混合动力数据框 hb_18 的两个副本
+df1 = hb_18.copy()
+df2 = hb_18.copy()
+
+# 待分割列的列表
+split_columns = ['fuel','city_mpg','hwy_mpg','cmb_mpg']
+
+# 对每个数据框副本的每个列应用分割功能
+for c in split_columns:
+    df1[c] = df1[c].apply(lambda x:x.split("/")[0])
+    df2[c] = df2[c].apply(lambda x:x.split("/")[0])
+
+# 添加这两个数据框
+new_rows = df1.append(df2)
+
+# 从原始 2018 数据框中丢弃每个混合动力行
+# 对 hb_18 的索引进行 Pandas 的丢弃功能，实现上述步骤
+df_18.drop(hb_18.index, inplace=True)
+
+# 将 new_rows 添加到 df_18
+df_18 = df_18.append(new_rows,ignore_index=True)
+
+# 检查是否已删除
+df_18[df_18['fuel'].str.contains('/')]
+
+# 对于 2008 空气污染列，将字符串转换成浮点
+df_08['air_pollution_score'].astype(float);
+
+# 对于 2018 空气污染列，将整数转换成浮点
+df_18['air_pollution_score'].astype(float);
+
+#保存
+df_08.to_csv('data_08.csv', index=False)
+df_18.to_csv('data_18.csv', index=False)
+
+# 修正数据类型3
+
+# 加载数据集
+import pandas as pd
+df_08 = pd.read_csv('data_08.csv')
+df_18 = pd.read_csv('data_18.csv')
+
+# 将 mpg 列转换成浮点
+mpg_columns = ['city_mpg','hwy_mpg','cmb_mpg']
+for c in mpg_columns:
+    df_18[c] = df_18[c].astype(float)
+    df_08[c] = df_08[c].astype(float)
+    
+# 将浮点转换成整数
+df_08['greenhouse_gas_score'] = df_08['greenhouse_gas_score'].astype(int)
+
+#检查
+df_08.dtypes == df_18.dtypes
+
+# 将新 CLEAN 数据集保存为新文件！
+df_08.to_csv('clean_08.csv', index=False)
+df_18.to_csv('clean_18.csv', index=False)
+
+# 可视化-------------------------------------
+
+# load datasets
+import pandas as pd
+import matplotlib.pyplot as plt
+
+import numpy as np
+import seaborn as sns
+sns.set_style('darkgrid')
+
+%matplotlib inline
+df_08 = pd.read_csv('clean_08.csv')
+df_18 = pd.read_csv('clean_18.csv')
+
+# questions
+# Q1: 与2008年相比，2018年是否有更多的车型（去重后）使用替代能源？比例增长了多少？
+# Q2: 各车辆类别（veh_class）在燃料经济性方面的改进（mpg 的增长）是多少？
+# Q3: SmartWay 车辆的特点是什么？它们是否随时间推移发生了改变？（mpg，温室气体排放量）
+# Q4: 哪些特征与更好的燃料经济性 (mpg) 相关联？
+
+# Q1
+a = 1-df_08['fuel'].value_counts()['Gasoline'] / df_08.shape[0]
+b = 1-df_18['fuel'].value_counts()['Gasoline'] / df_18.shape[0]
+
+c = df_08['fuel'].value_counts()
+d = df_18['fuel'].value_counts()
+
+ind = np.arange(5)
+width = 0.35
+
+bar_08 = plt.bar(ind,c,width,color='r',alpha=.7,label='2008')
+bar_18 = plt.bar(ind + width, d, width, color='b',alpha=.7,label='2018')
+
+plt.xlabel('Year')
+plt.ylabel('Quantity')
+plt.title('Change of fuel usage')
+locations = ind + width / 2
+labels = ['Gasoline','Ethanol','Gas','Diesel','Electricity']
+plt.xticks(locations,labels)
+
+plt.legend()
+
+#Q2
+a = df_08.groupby('veh_class')['hwy_mpg'].mean()
+b = df_18.groupby('veh_class')['hwy_mpg'].mean()
+
+b['SUV']=b['small SUV']+b['standard SUV']
+a['special purpose']=0
+b['van']=0
+
+b.drop(['small SUV','standard SUV'],inplace=True)
+
+ind = np.arange(9)
+width = 0.35
+
+bar_08 = plt.bar(ind,a,width,color='r',alpha=.7,label='2008')
+bar_18 = plt.bar(ind + width, b, width, color='b',alpha=.7,label='2018')
+
+plt.xlabel('veh_class')
+plt.ylabel('mpg')
+plt.title('Change of mpg usage')
+locations = ind+width/2
+labels=['1','2','3','4','5','6','7','8','9']
+plt.xticks(locations,labels)
+
+plt.legend()
+
+# Q3
+a = df_08.query('smartway=="yes"')
+b = df_18.query('smartway=="Yes" | smartway=="Elite"')
+
+a1 = a['city_mpg'].mean()
+b1 = b['city_mpg'].mean()
+
+a2 = a['greenhouse_gas_score'].mean()
+b2 = b['greenhouse_gas_score'].mean()
+
+c = [a1,a2]
+d = [b1,b2]
+
+ind = np.arange(2)
+width = 0.35
+
+bar_08 = plt.bar(ind,c,width,color='r',alpha=.7,label='2008')
+bar_18 = plt.bar(ind + width, d, width, color='b',alpha=.7,label='2018')
+
+plt.xlabel('variable')
+plt.ylabel('number')
+plt.title('smartway')
+locations = ind+width/2
+labels=['mpg','greenhouse_gas']
+plt.xticks(locations,labels)
+
+plt.legend()
+
+# Q4
+df_08.corr()
+
+# 合并数据集----------------------------------------------------------------
+# eg.
+df =  pd.merge(df_08,df_18,on='model')
+df.info()
+
+# 加载数据集
+import pandas as pd
+df_08 = pd.read_csv('clean_08.csv')
+df_18 = pd.read_csv('clean_18.csv')
+
+# 执行内部合并，左侧为 model_2008 和右侧为 model。
+df_08_temp = df_08.drop(['model'],axis=1)
+df_08_temp = df_08_temp.rename(columns=(lambda x : x[:10]+"_2008"))
+df_08_temp['model']=df_08['model']
+
+# 合并数据集
+df_combined = pd.merge(df_18,df_08_temp,how='inner',on='model')
+df_combined.to_csv('combined_dataset.csv', index=False)
+
+# -----------------------------------------------------------
+# 加载数据集
+import pandas as pd
+df = pd.read_csv('combined_dataset.csv')
+
+# Q6 问题 6: 对于 2008 年生产且 2018 年仍在生产中的车型，mpg 有多少改进，哪些车辆的改进最多？
+a = df.groupby('veh_class')['cmb_mpg'].mean()
+b = df.groupby('veh_class')['cmb_mpg_2008'].mean()
+
+
+
