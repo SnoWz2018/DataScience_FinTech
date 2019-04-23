@@ -1,0 +1,222 @@
+# 导入 numpy 和 pandas
+import numpy as np
+import pandas as pd
+# 加载红葡萄酒和白葡萄酒数据集
+red_df = pd.read_csv('winequality-red.csv',sep=';')
+red_df = red_df.rename(columns={'total_sulfur-dioxide':'total_sulfur_dioxide'})
+white_df = pd.read_csv('winequality-white.csv',sep=';')
+
+# 为红葡萄酒数据框创建颜色数组
+color_red = np.repeat('red',1599)
+
+# 为白葡萄酒数据框创建颜色数组
+color_white = np.repeat('white',4898)
+
+red_df['color'] = color_red
+red_df.head()
+
+white_df['color'] = color_white
+white_df.head()
+
+# 附加数据框
+wine_df = red_df.append(white_df,ignore_index=True,sort=False)
+
+# 查看数据框，检查是否成功
+wine_df.to_csv('winequality-edited.csv',index=False)
+
+df1 = pd.read_csv('winequality-edited.csv')
+df1.info()
+
+# first visualization -------------------------------------------------------------------
+
+# 加载数据集
+import pandas as pd
+import matplotlib as plt
+% matplotlib inline
+import numpy as np
+
+df = pd.read_csv('winequality-edited.csv')
+df.hist();
+df.plot(x='pH',y='quality',kind='scatter')
+
+# pandas.groupby--------------------------------------------------------------------------
+# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.groupby.html
+
+# Load `winequality_edited.csv`
+import pandas as pd
+df = pd.read_csv('winequality-edited.csv')
+
+# 用 groupby 计算每个酒类型（红葡萄酒和白葡萄酒）的平均质量
+df.groupby('color')['quality'].mean()
+
+# pandas.cut--------------------------------------------------------------------------------
+# 用 Pandas 描述功能查看最小、25%、50%、75% 和 最大 pH 值
+df['pH'].describe()
+# 对用于把数据“分割”成组的边缘进行分组
+bin_edges = [2.72,3.11,3.21,3.32,4.01] # 用刚才计算的五个值填充这个列表
+
+# 四个酸度水平组的标签
+bin_names = ['high','median_high','median','low'] # 对每个酸度水平类别进行命名
+
+# 创建 acidity_levels 列
+df['acidity_levels'] = pd.cut(df['pH'], bin_edges, labels=bin_names)
+
+# 检查该列是否成功创建
+df.head()
+
+# 用 groupby 计算每个酸度水平的平均质量
+df.groupby('acidity_levels')['quality'].mean()
+
+# 保存更改，供下一段使用
+df.to_csv('winequality_edited.csv',index=False)
+
+# pandas.query----------------------------------------------------------------------------
+# eg.
+# selecting malignant records in cancer data
+df_m = df[df['diagnosis'] == 'M']
+df_m = df.query('diagnosis == "M"')
+
+# selecting records of people making over $50K
+df_a = df[df['income'] == '>50K']
+df_a = df.query('income == ">50K"')
+
+# 加载 `winequality_edited.csv`
+import pandas as pd
+df = pd.read_csv('winequality_edited.csv')
+
+# 获取酒精含量的中位数
+df['alcohol'].median()
+
+# 选择酒精含量小于中位数的样本
+low_alcohol = df.query('alcohol<10.3')
+
+# 选择酒精含量大于等于中位数的样本
+high_alcohol = df.query('alcohol>=10.3')
+
+# 确保这些查询中的每个样本只出现一次
+num_samples = df.shape[0]
+num_samples == low_alcohol['quality'].count() + high_alcohol['quality'].count() # 应为真
+
+# 获取低酒精含量组和高酒精含量组的平均质量评分
+low_alcohol_mean = low_alcohol['quality'].mean()
+high_alcohol_mean = high_alcohol['quality'].mean()
+
+# 获取残留糖分的中位数
+df['residual_sugar'].median()
+
+# 选择残留糖分小于中位数的样本
+low_sugar = df.query('residual_sugar<3')
+
+# 选择残留糖分大于等于中位数的样本
+high_sugar = df.query('residual_sugar>=3')
+
+# 确保这些查询中的每个样本只出现一次
+num_samples == low_sugar['quality'].count() + high_sugar['quality'].count() # 应为真
+
+# 获取低糖分组和高糖分组的平均质量评分
+low_suger_mean = low_sugar['quality'].mean()
+high_sugar_mean = high_sugar['quality'].mean()
+
+# second visualization-------------------------------------------------------------------------
+
+# 导入所需数据包并加载 `winequality_edited.csv`
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+% matplotlib inline
+
+df = pd.read_csv('winequality_edited.csv')
+
+# Question one: 酒精含量高的酒是否评分较高？
+
+# 用查询功能选择每个组，并获取其平均质量
+median = df['alcohol'].median()
+
+low = df.query('alcohol < 10.3')
+high = df.query('alcohol >= 10.3')
+
+mean_quality_low = low['quality'].mean()
+mean_quality_high = high['quality'].mean()
+
+# 用合适的标签创建柱状图
+locations = [1, 2]
+heights = [mean_quality_low, mean_quality_high]
+labels = ['Low', 'High']
+plt.bar(locations, heights, tick_label=labels)
+
+plt.title('Average Quality Ratings by Alcohol Content')
+plt.xlabel('Alcohol Content')
+plt.ylabel('Average Quality Rating');
+
+# Question two : 口感较甜的酒是否评分较高？
+
+df['residual_sugar'].median()
+
+low_sugar = df.query('residual_sugar<3')
+high_sugar = df.query('residual_sugar>=3')
+
+mean_sugar_low = low_sugar['quality'].mean()
+mean_sugar_high = high_sugar['quality'].mean()
+
+# 用合适的标签创建柱状图
+locations = [1, 2]
+heights = [mean_suagr_low, mean_sugar_high]
+labels = ['Low', 'High']
+plt.bar(locations, heights, tick_label=labels)
+
+plt.title('Average Quality Ratings by Residual Sugar')
+plt.xlabel('Residual Sugar')
+plt.ylabel('Average Quality Rating');
+
+# Quenstion three: 哪个酸度水平的平均评分最高？
+
+# 使用分组功能获取每个酸度水平的平均质量
+df.groupby('acidity_levels')['quality'].mean()
+
+# 用合适的标签创建柱状图
+means = df.groupby('acidity_levels')['quality'].mean()
+means.plot(kind='bar',title='relation of acidity_level and quality')
+plt.xlabel('acid')
+plt.ylabel('quality')
+
+# ps.创建线图 https://matplotlib.org/api/pyplot_api.html#matplotlib.pyplot.plot
+
+
+# 用 Matplotlib 绘制酒的类型和质量视图 --------------------------------------------
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+% matplotlib inline
+import seaborn as sns
+sns.set_style('darkgrid')
+
+wine_df = pd.read_csv('winequality_edited.csv')
+
+color_counts = wine_df.groupby(['color', 'quality']).count()['pH']  # 随便一列都可以，不一定是pH列
+color_totals = wine_df.groupby('color').count()['pH']
+
+# 将红/白葡萄酒等级数量除以红/白葡萄酒样本总数，获取比例
+red_proportions = color_counts['red'] / color_totals['red']
+white_proportions = color_counts['white'] / color_totals['white']
+
+# 使上面两个数据同维度
+red_proportions['9'] = 0
+
+ind = np.arange(len(red_proportions))  # 组的 x 坐标位置
+width = 0.35       # 条柱的宽度
+
+# 绘制条柱 , alpha是透明度
+red_bars = plt.bar(ind, red_proportions, width, color='r', alpha=.7, label='Red Wine')
+white_bars = plt.bar(ind + width, white_proportions, width, color='w', alpha=.7, label='White Wine')
+
+# 标题和标签
+plt.ylabel('Proportion')
+plt.xlabel('Quality')
+plt.title('Proportion by Wine Color and Quality')
+locations = ind + width / 2  # x 坐标刻度位置
+labels = ['3', '4', '5', '6', '7', '8', '9']  # x 坐标刻度标签
+plt.xticks(locations, labels)
+
+# 图例
+plt.legend()
