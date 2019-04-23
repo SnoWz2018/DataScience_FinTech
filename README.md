@@ -14,4 +14,5 @@ Wraggling : Gather - Assess - Clean
 EDA : Explorative Data Analysis : Explore - Augment
 
 Case1: wine quality
+Case2: fuel data
 
