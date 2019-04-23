@@ -7,5 +7,6 @@ Part 1.
 Wraggling vs EDA
 
 Wraggling : Gather - Assess - Clean
+
 EDA : Explorative Data Analysis : Explore - Augment
 
