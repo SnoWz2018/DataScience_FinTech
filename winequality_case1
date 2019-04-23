@@ -1,3 +1,5 @@
+# 原始数据来自：https://archive.ics.uci.edu/ml/datasets/Wine+Quality
+
 # 导入 numpy 和 pandas
 import numpy as np
 import pandas as pd
