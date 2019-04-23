@@ -1,0 +1,43 @@
+# 读入 `cancer_data.csv`
+import pandas as pd
+df = pd.read_csv('cancer_data.csv')
+
+# 查看缺失值
+df.info()
+# or
+df.isnull().any()
+
+# 用均值填充缺失值
+m1 = df['texture_mean'].mean()
+df['texture_mean'].fillna(m1,inplace=True)
+# 确认修改
+df.info()
+
+# 检查数据中的重复
+df.duplicated()
+# 丢弃重复
+df.drop_duplicates()
+
+df.duplicated()
+
+# 重命名列
+
+# 从列名称中移除 "_mean"
+new_labels = []
+for col in df.columns:
+    if '_mean' in col:
+        new_labels.append(col[:-5])  # 不包括最后 6 个字符
+    else:
+        new_labels.append(col)
+
+# 列的新标签
+new_labels
+
+# 为数据框中的列分配新标签
+df.columns = new_labels
+
+# 显示数据框的前几行，确认更改
+df.head()
+
+# 将其保存，供稍后使用
+df.to_csv('cancer_data_edited.csv', index=False)
