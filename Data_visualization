@@ -1,0 +1,15 @@
+# 导入并加载数据
+import pandas as pd
+% matplotlib inline
+df = pd.read_csv('powerplant_data_edited.csv')
+df.head()
+
+# 绘制温度与电力输出之间的关系图
+df.plot(x='AT',y='PE',kind='scatter')
+
+# 绘制湿度分布图/直方图
+df.hist('RH');
+
+# 绘制每个变量的箱线图
+df['RH'].plot(kind='box')
+
