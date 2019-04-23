@@ -6,6 +6,9 @@ red_df = pd.read_csv('winequality-red.csv',sep=';')
 red_df = red_df.rename(columns={'total_sulfur-dioxide':'total_sulfur_dioxide'})
 white_df = pd.read_csv('winequality-white.csv',sep=';')
 
+red_df.shape[0]
+white_df.shape[0]
+
 # 为红葡萄酒数据框创建颜色数组
 color_red = np.repeat('red',1599)
 
@@ -85,7 +88,7 @@ import pandas as pd
 df = pd.read_csv('winequality_edited.csv')
 
 # 获取酒精含量的中位数
-df['alcohol'].median()
+df['alcohol'].median() # =10.3
 
 # 选择酒精含量小于中位数的样本
 low_alcohol = df.query('alcohol<10.3')
@@ -102,7 +105,7 @@ low_alcohol_mean = low_alcohol['quality'].mean()
 high_alcohol_mean = high_alcohol['quality'].mean()
 
 # 获取残留糖分的中位数
-df['residual_sugar'].median()
+df['residual_sugar'].median() # =3
 
 # 选择残留糖分小于中位数的样本
 low_sugar = df.query('residual_sugar<3')
