@@ -1,0 +1,31 @@
+# read_csv detail
+# https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.read_csv.html
+
+import pandas as pd
+df = pd.read_csv('student_scores.csv') # read_csv默认分隔符是","
+df.head()
+
+#分隔符
+df = pd.read_csv('file_name.csv',sep=":")
+
+#指定标题
+df = pd.read_csv('studen_scores.csv',header=2)
+df.head()
+
+#指定列标签
+labels = ['id', 'name', 'attendance', 'hw', 'test1', 'project1', 'test2', 'project2', 'final']
+df = pd.read_csv('student_scores.csv', names=labels)
+df.head()
+
+#指定索引
+df = pd.read_csv('student_scores.csv', index_col='Name')
+df.head()
+
+df = pd.read_csv('student_scores.csv', index_col=['Name', 'ID'])
+df.head()
+
+#写入
+df.to_csv('file_name.csv')
+
+df_new = pd.read_csv('file_name.csv')
+df.head()
