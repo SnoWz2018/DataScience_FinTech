@@ -1,0 +1,54 @@
+# 表之间的连接参照“实体关系图ERD_for_SQL”
+
+SELECT orders.*, accounts.*
+FROM accounts
+JOIN orders
+ON accounts.id = orders.account_id;
+
+SELECT r.name region, a.name account,
+o.total_amt_usd/(o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON s.region_id = r.id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+JOIN orders o
+ON o.account_id = a.id;
+
+# LEFT JOIN & RIGHT JOIN
+
+SELECT c.countryid, c.countryName, s.stateName
+FROM Country c
+LEFT JOIN State s
+ON c.countryid = s.countryid;
+
+# 一些综合的例子 （JOIN 和 过滤）
+
+SELECT r.name region, s.name rep, a.name account
+FROM sales_reps s
+JOIN region r
+ON s.region_id = r.id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+WHERE r.name = 'Midwest'
+ORDER BY a.name;
+
+SELECT r.name region, s.name rep, a.name account
+FROM sales_reps s
+JOIN region r
+ON s.region_id = r.id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+WHERE r.name = 'Midwest' AND s.name LIKE '% K%'
+ORDER BY a.name;
+
+SELECT r.name region, a.name account, o.total_amt_usd/(o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON s.region_id = r.id
+JOIN accounts a
+ON a.sales_rep_id = s.id
+JOIN orders o
+ON o.account_id = a.id
+WHERE o.standard_qty > 100 AND o.poster_qty > 50
+ORDER BY unit_price DESC;
